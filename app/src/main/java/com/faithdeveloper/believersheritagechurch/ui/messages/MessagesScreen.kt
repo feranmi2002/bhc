@@ -1,0 +1,360 @@
+package com.faithdeveloper.believersheritagechurch.ui.messages
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.faithdeveloper.believersheritagechurch.data.LoadType
+import com.faithdeveloper.believersheritagechurch.data.Util
+import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.viewmodel.MessageViewModel
+
+
+@Composable
+fun MessagesScreen(
+    messageViewModel: MessageViewModel,
+    modifier: Modifier = Modifier,
+    onClick: (message: Message) -> Unit,
+    loadTypeSelected: (loadType: LoadType) -> Unit,
+    onSearchTextChange: (text: String) -> Unit,
+    onSearch: () -> Unit
+) {
+    val lazyPagingMessages = messageViewModel.messages.collectAsLazyPagingItems()
+    val loadType by messageViewModel.loadType.collectAsState()
+    val searchText by messageViewModel.searchText.collectAsState()
+
+    var searchVisible by rememberSaveable() {
+        mutableStateOf(false)
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        if (searchVisible) {
+            ReusableSearch(
+                searchText = searchText,
+                onSearchTextChange = {
+                    onSearchTextChange.invoke(it)
+                },
+                onCloseSearch = {
+                    searchVisible = false
+                    onSearchTextChange.invoke("")
+                },
+                onSearch = {
+                    onSearch.invoke()
+                },
+                title = messageViewModel.messageType
+            )
+        } else {
+            Top(
+                modifier = Modifier.padding(bottom = 8.dp),
+                title = messageViewModel.messageType
+            ) {
+                searchVisible = true
+            }
+        }
+
+        ChipGroup(selectedType = loadType, onSelectedChange = {
+            loadTypeSelected.invoke(it)
+        })
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            when (lazyPagingMessages.loadState.refresh) {
+                is LoadState.Error -> {
+                    item {
+                        Column(
+                            modifier = Modifier.fillParentMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = "No Internet Connection", color = MaterialTheme.colorScheme.error)
+                            Button(
+                                onClick = { lazyPagingMessages.retry() },
+                                modifier = Modifier.wrapContentSize(align = Alignment.Center)
+                            ) {
+                                Text(text = "RETRY")
+                            }
+                        }
+                    }
+                }
+
+                is LoadState.Loading -> {
+                    item {
+                        Column(
+                            modifier = Modifier.fillParentMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+
+                    }
+                }
+
+                else -> {
+                    items(items = lazyPagingMessages, key = { it.id }) { message ->
+                        if (message != null) {
+                            MessagesRow(message = message, onClick = onClick)
+                        }
+                    }
+                }
+            }
+
+            when (lazyPagingMessages.loadState.append) {
+                is LoadState.Loading -> {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .wrapContentHeight(align = Alignment.CenterVertically),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                is LoadState.Error -> {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .wrapContentHeight(align = Alignment.CenterVertically),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = "No Internet Connection", color = MaterialTheme.colorScheme.error)
+                            Button(
+                                onClick = { lazyPagingMessages.retry() },
+                                modifier = Modifier.wrapContentSize(align = Alignment.Center)
+                            ) {
+                                Text(text = "RETRY")
+                            }
+                        }
+                    }
+                }
+
+                else -> Unit
+            }
+        }
+
+    }
+
+}
+
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun MessagesRow(message: Message, onClick: (message: Message) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(align = Alignment.CenterVertically)
+            .clickable {
+                onClick.invoke(message)
+            }
+    ) {
+        GlideImage(
+            alignment = Alignment.Center,
+            model = message.imageLink,
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(16.dp))
+
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(1.dp, alignment = Alignment.CenterVertically)
+        ) {
+            Text(
+                modifier = Modifier.padding(bottom = 1.dp),
+                text = message.title,
+                style = MaterialTheme.typography.titleMedium
+            )
+            if(message.description.isNotBlank()) {
+                Text(
+                    modifier = Modifier.padding(bottom = 1.dp),
+                    text = message.description,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Text(
+                modifier = Modifier.padding(bottom = 1.dp),
+                text = "By: ${message.preacher}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 1.dp),
+                text = Util.formatDuration(message.length),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = Util.formatDate(message.date),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+fun Chip(
+    loadType: LoadType,
+    isSelected: Boolean = false,
+    onSelectionChanged: (loadType: LoadType) -> Unit
+) {
+    Surface(
+        modifier = Modifier.padding(4.dp),
+        tonalElevation = 8.dp,
+        shape = MaterialTheme.shapes.medium,
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary
+    ) {
+        Row(
+            modifier = Modifier
+                .toggleable(
+                    value = isSelected,
+                    onValueChange = {
+                        onSelectionChanged.invoke(loadType)
+                    }
+                )
+        ) {
+            Text(
+                text = when (loadType) {
+                    LoadType.ASCENDING -> "Older"
+                    LoadType.DESCENDING -> "Latest"
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun ChipGroup(
+    loadTypes: List<LoadType> = listOf(LoadType.DESCENDING, LoadType.ASCENDING),
+    selectedType: LoadType,
+    onSelectedChange: (loadType: LoadType) -> Unit
+) {
+    Column(modifier = Modifier.padding(8.dp)) {
+        LazyRow {
+            items(loadTypes) { it ->
+                Chip(
+                    loadType = it,
+                    onSelectionChanged = {
+                        onSelectedChange.invoke(it)
+                    },
+                    isSelected = selectedType == it
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+fun ReusableSearch(
+    searchText: String,
+    onSearchTextChange: (text: String) -> Unit,
+    onCloseSearch: () -> Unit,
+    onSearch: () -> Unit,
+    title: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .weight(1f)
+                .wrapContentHeight(),
+            value = searchText,
+            onValueChange = {
+                onSearchTextChange.invoke(it)
+            },
+            placeholder = { Text(text = "Search $title") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onSearch = {
+                if (searchText.isNotBlank()) {
+                    onSearch.invoke()
+                }
+            }),
+            keyboardOptions = KeyboardOptions(
+                autoCorrect = false,
+                imeAction = ImeAction.Search,
+                keyboardType = KeyboardType.Text
+            )
+        )
+
+        Image(
+            modifier = Modifier
+                .clickable {
+                    onCloseSearch.invoke()
+                }
+                .padding(start = 8.dp),
+            imageVector = Icons.Default.Close,
+            contentDescription = "Close Search"
+        )
+
+    }
+}
+
+@Composable
+fun Top(
+    modifier: Modifier = Modifier,
+    title: String,
+    searchVisible: () -> Unit
+) {
+    Row(
+        modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center,
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Image(modifier = Modifier.clickable {
+            searchVisible.invoke()
+        }, imageVector = Icons.Default.Search, contentDescription = null)
+    }
+}

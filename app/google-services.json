@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "437587265052",
+    "project_id": "bhcapp-9c546",
+    "storage_bucket": "bhcapp-9c546.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437587265052:android:756217b9b698f4d63d81d9",
+        "android_client_info": {
+          "package_name": "com.faithdeveloper.believersheritagechurch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "437587265052-blm7r5lv78qub4u13a0jrbviqr4fv1c6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFmVo0yxTPVzgJS6fPWyppcE27bh4nikA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "437587265052-blm7r5lv78qub4u13a0jrbviqr4fv1c6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,129 @@
+package com.faithdeveloper.believersheritagechurch.data.playing
+
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.Build
+import android.os.IBinder
+import com.faithdeveloper.believersheritagechurch.data.PlaybackState
+import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.playingservice.PlayingService
+import com.faithdeveloper.believersheritagechurch.playingservice.PlayingServiceInterface
+import com.faithdeveloper.believersheritagechurch.utils.AppPreferences.getPlayingServiceState
+import kotlin.properties.Delegates
+
+class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRepository,
+    RepositoryServiceInterface {
+    private lateinit var playingService: PlayingService
+    private var mBound = false
+    private lateinit var message: Message
+    private lateinit var viewmodel: PlayingServiceInterface
+    private var servicePreviouslyStartedState by Delegates.notNull<Boolean>()
+
+    init {
+        servicePreviouslyStartedState = applicationContext.getPlayingServiceState()
+    }
+
+    override fun viewModelInstance(viewModel: PlayingServiceInterface) {
+        this.viewmodel = viewModel
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as PlayingService.LocalBinder
+            playingService = binder.getService()
+            mBound = true
+            playingService.repositoryInstance(this@PlayingRepositoryImpl)
+            if (playingService.aMessageIsAlreadyPlaying()) {
+                if (playingService.getMessage().id == message.id) {
+                    if (playingService.mediasIsPlaying()) {
+                        viewmodel.playbackState(
+                            PlaybackState.PLAYING
+                        )
+                    } else {
+                        viewmodel.playbackState(PlaybackState.PAUSED)
+                    }
+                } else {
+                    playingService.stopMediaToRestartAnotherOne()
+                    playingService.startPlaying(message)
+                }
+            } else {
+                playingService.startPlaying(message)
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mBound = false
+        }
+    }
+
+    override fun startService(message: Message) {
+        if (servicePreviouslyStartedState) {
+            bindService()
+        } else {
+            this.message = message
+            val intent = Intent(applicationContext, PlayingService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) applicationContext.startForegroundService(
+                intent
+            )
+            else applicationContext.startService(intent)
+            bindService()
+        }
+    }
+
+    private fun bindService() {
+        val intent = Intent(applicationContext, PlayingService::class.java)
+        applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    override fun unbindService() {
+        mBound = false
+        applicationContext.unbindService(serviceConnection)
+    }
+
+    override fun unbind() {
+        if (mBound) {
+            unbindService()
+        }
+        viewmodel.navigateBackwards()
+    }
+    override fun playbackPosition(): Int = if (this::playingService.isInitialized) {
+        playingService.getCurrentPosition()
+    } else 0
+
+
+    override fun pauseMedia() {
+        playingService.pauseMedia()
+    }
+
+    override fun resumeMedia() {
+        playingService.resumeMedia()
+    }
+
+    override fun restartMediaAfterError() {
+        playingService.restartMediaAfterError()
+    }
+
+    override fun restartMediaAfterCompletion() {
+        playingService.restartMediaAfterCompletion()
+    }
+
+    override fun endService() {
+        unbindService()
+        playingService.stopMediaPermanently()
+    }
+
+    override fun seekTo(position: Float) {
+        playingService.seekTo(position)
+    }
+
+    override fun playbackState(playbackState: PlaybackState) {
+        viewmodel.playbackState(playbackState)
+    }
+
+    override fun pauseDueToSlider() {
+        playingService.pauseDueToSeeking()
+    }
+
+}
