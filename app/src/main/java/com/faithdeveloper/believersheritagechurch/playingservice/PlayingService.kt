@@ -29,8 +29,9 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.faithdeveloper.believersheritagechurch.R
-import com.faithdeveloper.believersheritagechurch.data.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
+import com.faithdeveloper.believersheritagechurch.data.playing.PlayingSpeed
 import com.faithdeveloper.believersheritagechurch.data.playing.RepositoryServiceInterface
 import com.faithdeveloper.believersheritagechurch.ui.MainActivity
 import com.faithdeveloper.believersheritagechurch.utils.AppPreferences.storePlayingServiceState
@@ -498,6 +499,22 @@ class PlayingService : Service() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setSilent(true)
+    }
+
+    fun setPlayingSpeed(playingSpeed: PlayingSpeed) {
+        val speed:Float
+        when(playingSpeed){
+            PlayingSpeed.ONE_X -> {
+                speed = 1.0f
+            }
+            PlayingSpeed.ONE_FIVE_X -> {
+                speed = 1.5f
+            }
+            PlayingSpeed.TWO_X -> {
+                speed = 2.0f
+            }
+        }
+        mediaPlayer?.playbackParams = mediaPlayer!!.playbackParams!!.setSpeed(speed)
     }
 
     inner class PlayingServiceBroadcastReceiver : BroadcastReceiver() {

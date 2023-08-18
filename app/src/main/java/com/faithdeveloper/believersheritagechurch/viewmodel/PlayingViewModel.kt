@@ -1,9 +1,10 @@
 package com.faithdeveloper.believersheritagechurch.viewmodel
 
 import androidx.lifecycle.*
-import com.faithdeveloper.believersheritagechurch.data.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.playing.PlayingRepository
+import com.faithdeveloper.believersheritagechurch.data.playing.PlayingSpeed
 import com.faithdeveloper.believersheritagechurch.download.DownloadInterface
 import com.faithdeveloper.believersheritagechurch.download.DownloadRepository
 import com.faithdeveloper.believersheritagechurch.download.DownloadStatus
@@ -33,6 +34,9 @@ class PlayingViewModel private constructor(
 
     private val _navigateBackwards = MutableLiveData(false)
     val navigateBackwards:LiveData<Boolean> get() = _navigateBackwards
+
+    private val _playingSpeed = MutableLiveData(PlayingSpeed.ONE_X)
+    val playingSpeed:LiveData<PlayingSpeed> get() = _playingSpeed
 
 
     var playbackPosition = flow {
@@ -152,6 +156,23 @@ class PlayingViewModel private constructor(
         playingRepository.endService()
     }
 
+    fun speedPlay(){
+        when(playingSpeed.value!!){
+            PlayingSpeed.ONE_X -> {
+                _playingSpeed.value = PlayingSpeed.ONE_FIVE_X
+            }
+
+            PlayingSpeed.ONE_FIVE_X -> {
+                _playingSpeed.value = PlayingSpeed.TWO_X
+            }
+
+            PlayingSpeed.TWO_X -> {
+                _playingSpeed.value = PlayingSpeed.ONE_X
+            }
+        }
+        playingRepository.setPlayingSpeed(playingSpeed.value!!)
+    }
+
     @Suppress("UNCHECKED_CAST")
     companion object {
         fun provideFactory(
@@ -165,6 +186,4 @@ class PlayingViewModel private constructor(
                 }
             }
     }
-
-
 }

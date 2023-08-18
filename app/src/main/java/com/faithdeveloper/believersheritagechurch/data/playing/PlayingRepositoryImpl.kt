@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import com.faithdeveloper.believersheritagechurch.data.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.messages.Message
 import com.faithdeveloper.believersheritagechurch.playingservice.PlayingService
 import com.faithdeveloper.believersheritagechurch.playingservice.PlayingServiceInterface
@@ -126,4 +125,7 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
         playingService.pauseDueToSeeking()
     }
 
+    override fun setPlayingSpeed(playingSpeed: PlayingSpeed) {
+        playingService.setPlayingSpeed(playingSpeed)
+    }
 }

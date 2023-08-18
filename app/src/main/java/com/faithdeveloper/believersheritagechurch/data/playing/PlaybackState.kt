@@ -1,4 +1,4 @@
-package com.faithdeveloper.believersheritagechurch.data
+package com.faithdeveloper.believersheritagechurch.data.playing
 
 enum class PlaybackState {
     PLAYING,

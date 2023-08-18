@@ -23,9 +23,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.faithdeveloper.believersheritagechurch.R
-import com.faithdeveloper.believersheritagechurch.data.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.Util
 import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
+import com.faithdeveloper.believersheritagechurch.data.playing.PlayingSpeed
 import com.faithdeveloper.believersheritagechurch.download.DownloadStatus
 import com.faithdeveloper.believersheritagechurch.viewmodel.PlayingViewModel
 import kotlinx.coroutines.delay
@@ -40,7 +41,8 @@ fun PlayingScreen(
     onDownload: () -> Unit,
     playingScreenLeft: () -> Unit,
     pauseDueToSlider: () -> Unit,
-    stopMedia: () -> Unit
+    stopMedia: () -> Unit,
+    speedPlay: () -> Unit
 ) {
     DisposableEffect(key1 = playingViewModel) {
         onDispose {
@@ -54,6 +56,8 @@ fun PlayingScreen(
     )
     val downloadStatus by playingViewModel.downloadStatus.observeAsState(initial = DownloadStatus.UNDOWNLOADED)
     val navigateBackwards by playingViewModel.navigateBackwards.observeAsState(false)
+
+    val playingSpeed by playingViewModel.playingSpeed.observeAsState()
 
     if (navigateBackwards) {
         onClickBack.invoke()
@@ -92,7 +96,9 @@ fun PlayingScreen(
             message = message,
             playbackState = playbackState,
             downloadStatus = downloadStatus,
-            stopMedia = stopMedia
+            stopMedia = stopMedia,
+            speedPlay = speedPlay,
+            playingSpeed = playingSpeed!!
         )
     }
 }
@@ -203,7 +209,9 @@ fun PlayingControls(
     message: Message,
     playbackState: PlaybackState,
     downloadStatus: DownloadStatus,
-    stopMedia: () -> Unit
+    stopMedia: () -> Unit,
+    speedPlay: () -> Unit,
+    playingSpeed: PlayingSpeed
 ) {
     Row(
         modifier = Modifier
@@ -229,6 +237,20 @@ fun PlayingControls(
             },
             painter = painterResource(id = R.drawable.ic_outline_info_24), contentDescription = null
         )
+
+        if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.PAUSED) {
+            Text(
+                modifier = Modifier.clickable {
+                    speedPlay.invoke()
+                },
+                text = when (playingSpeed) {
+                    PlayingSpeed.ONE_X -> "1x"
+                    PlayingSpeed.ONE_FIVE_X -> "1.5x"
+                    PlayingSpeed.TWO_X -> "2x"
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         when (playbackState) {
             PlaybackState.BUFFERING -> {

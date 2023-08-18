@@ -15,5 +15,6 @@ interface PlayingRepository {
     fun restartMediaAfterCompletion()
     fun endService()
     fun pauseDueToSlider()
+    fun setPlayingSpeed(playingSpeed: PlayingSpeed)
 
 }

@@ -1,8 +1,6 @@
 package com.faithdeveloper.believersheritagechurch.ui.playing
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import com.faithdeveloper.believersheritagechurch.viewmodel.PlayingViewModel
 
 @Composable
@@ -31,6 +29,9 @@ fun PlayingRoute(playingViewModel: PlayingViewModel, onClickBack: () -> Unit) {
         stopMedia = {
             playingViewModel.stopMedia()
             onClickBack.invoke()
+        },
+        speedPlay = {
+            playingViewModel.speedPlay()
         }
     )
 }
