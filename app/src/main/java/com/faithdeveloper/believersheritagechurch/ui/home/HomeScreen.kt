@@ -11,6 +11,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,7 +23,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.faithdeveloper.believersheritagechurch.data.home.ImageSliderImage
+import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
 import com.faithdeveloper.believersheritagechurch.ui.AppDestinations
+import com.faithdeveloper.believersheritagechurch.ui.MainActivity
+import com.faithdeveloper.believersheritagechurch.ui.messages.PlayingBar
 import com.faithdeveloper.believersheritagechurch.utils.Result
 import com.faithdeveloper.believersheritagechurch.utils.Status
 import com.faithdeveloper.believersheritagechurch.viewmodel.HomeViewModel
@@ -35,9 +40,12 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     navigateTo: (destination: AppDestinations) -> Unit,
     onClickSliderImage: (imageSliderImage: ImageSliderImage) -> Unit,
-    retryLoadImages: () -> Unit
+    retryLoadImages: () -> Unit,
+    mainActivity: MainActivity,
+    navigateToPlayingActivity: (message: Message) -> Unit
 ) {
-
+    val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+    val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
     val images by homeViewModel.imageSliderImages.collectAsStateWithLifecycle()
 
     Surface(
@@ -47,11 +55,12 @@ fun HomeScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
             TopStrip()
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -61,15 +70,35 @@ fun HomeScreen(
             ) {
                 AutoSlidingCarousel(
                     images = images,
-                    retryLoadImages = {
-                        retryLoadImages.invoke()
-                    },
                     onClickSliderImage = { imageSliderImage ->
                         onClickSliderImage.invoke(imageSliderImage)
                     }
-                )
+                ) {
+                    retryLoadImages.invoke()
+                }
             }
-            Sections(navigateTO = navigateTo)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Sections(navigateTO = navigateTo)
+            }
+
+            if (mediaStarted) {
+                PlayingBar(
+                    mediaState = mediaState,
+                    message = mainActivity.getMessage()!!,
+                    playbackClick = {
+                        mainActivity.playbackClick()
+                    },
+                    barClick = {
+                        navigateToPlayingActivity.invoke(mainActivity.getMessage()!!)
+                    },
+                    stopPlayback = {
+                        mainActivity.stopPlayback()
+                    })
+            }
         }
     }
 }
@@ -95,7 +124,6 @@ fun TopStrip() {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun AutoSlidingCarousel(
-    modifier: Modifier = Modifier,
     autoSlideDuration: Long = 5000L,
     pagerState: PagerState = remember {
         PagerState()
@@ -200,7 +228,6 @@ fun Sections(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SectionImage(
     destination: AppDestinations,
@@ -221,12 +248,12 @@ fun SectionImage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
-                Image(
-                    modifier = Modifier
-                        .size(40.dp),
-                    painter = painterResource(id = destination.icon),
-                    contentDescription = null
-                )
+            Image(
+                modifier = Modifier
+                    .size(40.dp),
+                painter = painterResource(id = destination.icon),
+                contentDescription = null
+            )
             Text(
                 text = destination.title,
                 color = Color.Black,
@@ -235,3 +262,4 @@ fun SectionImage(
         }
     }
 }
+

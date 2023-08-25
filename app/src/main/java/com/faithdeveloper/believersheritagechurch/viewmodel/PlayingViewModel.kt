@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 
 class PlayingViewModel private constructor(
-    private val playingRepository: PlayingRepository,
+    val playingRepository: PlayingRepository,
     val message: Message,
     private val downloadRepository: DownloadRepository
 ) : ViewModel(), PlayingServiceInterface, DownloadInterface {
@@ -114,7 +114,7 @@ class PlayingViewModel private constructor(
 
     override fun onCleared() {
         if (!stopMedia) {
-            playingRepository.unbindService()
+            playingRepository.unbindServiceFromViewModel()
         }
         downloadRepository.unregisterReceiver()
         super.onCleared()

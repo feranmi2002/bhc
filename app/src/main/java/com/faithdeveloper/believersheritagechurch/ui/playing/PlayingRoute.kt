@@ -1,11 +1,20 @@
 package com.faithdeveloper.believersheritagechurch.ui.playing
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import com.faithdeveloper.believersheritagechurch.data.playing.PlayingRepository
 import com.faithdeveloper.believersheritagechurch.viewmodel.PlayingViewModel
 
 @Composable
-fun PlayingRoute(playingViewModel: PlayingViewModel, onClickBack: () -> Unit) {
-    playingViewModel.startMedia()
+fun PlayingRoute(
+    playingViewModel: PlayingViewModel,
+    onClickBack: () -> Unit,
+    setMainActivityPlayingRepository: (playingRepository:PlayingRepository) -> Unit
+) {
+    LaunchedEffect(key1 = playingViewModel ) {
+        playingViewModel.startMedia()
+        setMainActivityPlayingRepository.invoke(playingViewModel.playingRepository)
+    }
 
     PlayingScreen(
         onClickBack = onClickBack,
@@ -13,10 +22,10 @@ fun PlayingRoute(playingViewModel: PlayingViewModel, onClickBack: () -> Unit) {
         {
             playingViewModel.playbackStateAction()
         },
-        playingViewModel = playingViewModel,
         onSliderInteraction = { position ->
             playingViewModel.seekTo(position)
         },
+        playingViewModel = playingViewModel,
         onDownload = {
             playingViewModel.download()
         },
@@ -29,9 +38,8 @@ fun PlayingRoute(playingViewModel: PlayingViewModel, onClickBack: () -> Unit) {
         stopMedia = {
             playingViewModel.stopMedia()
             onClickBack.invoke()
-        },
-        speedPlay = {
-            playingViewModel.speedPlay()
         }
-    )
+    ) {
+        playingViewModel.speedPlay()
+    }
 }

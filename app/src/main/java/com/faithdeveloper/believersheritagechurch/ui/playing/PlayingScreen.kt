@@ -49,6 +49,7 @@ fun PlayingScreen(
             playingScreenLeft.invoke()
         }
     }
+
     val message = playingViewModel.message
     val playbackState by playingViewModel.playbackState.observeAsState(initial = PlaybackState.BUFFERING)
     val playbackPosition: Int by playingViewModel.playbackPosition.collectAsStateWithLifecycle(

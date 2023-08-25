@@ -10,14 +10,17 @@ import com.faithdeveloper.believersheritagechurch.data.AppContainer
 import com.faithdeveloper.believersheritagechurch.ui.theme.BHCTheme
 
 @Composable
-fun App(appContainer: AppContainer) {
+fun App(appContainer: AppContainer, mainActivity: MainActivity) {
+
     BHCTheme {
         val navController = rememberNavController()
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
             AppNavGraph(
+                mainActivity = mainActivity,
                 appContainer = appContainer,
                 modifier = Modifier,
                 navController = navController
@@ -25,3 +28,4 @@ fun App(appContainer: AppContainer) {
         }
     }
 }
+

@@ -5,7 +5,7 @@ import com.faithdeveloper.believersheritagechurch.playingservice.PlayingServiceI
 
 interface PlayingRepository {
     fun startService(message: Message)
-    fun unbindService()
+    fun unbindServiceFromViewModel()
     fun playbackPosition(): Int
     fun pauseMedia()
     fun resumeMedia()
@@ -16,5 +16,6 @@ interface PlayingRepository {
     fun endService()
     fun pauseDueToSlider()
     fun setPlayingSpeed(playingSpeed: PlayingSpeed)
-
+    fun getMessage():Message
+    fun mainActivityInstance(mainActivity:MainActivityPlayingServiceInterface)
 }

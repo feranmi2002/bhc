@@ -71,9 +71,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.15.0'
     implementation "com.github.bumptech.glide:compose:1.0.0-alpha.1"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4'
-    implementation 'androidx.datastore:datastore-preferences:1.0.0'
-    implementation 'androidx.datastore:datastore:1.0.0'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation'androidx.paging:paging-runtime-ktx:3.1.1'
     implementation'androidx.paging:paging-compose:1.0.0-alpha18'
     implementation 'com.google.code.gson:gson:2.10.1'

@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.faithdeveloper.believersheritagechurch.R
+import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.programmes.Programme
+import com.faithdeveloper.believersheritagechurch.ui.MainActivity
+import com.faithdeveloper.believersheritagechurch.ui.messages.PlayingBar
 import com.faithdeveloper.believersheritagechurch.ui.messages_section.ReusableTop
 import com.faithdeveloper.believersheritagechurch.utils.Status
 import com.faithdeveloper.believersheritagechurch.viewmodel.ProgrammesViewModel
@@ -28,14 +33,17 @@ import com.faithdeveloper.believersheritagechurch.viewmodel.ProgrammesViewModel
 @Composable
 fun ProgrammesScreen(
     programmesViewModel: ProgrammesViewModel,
-    retry: () -> Unit
+    retry: () -> Unit,
+    mainActivity: MainActivity,
+    navigateToPlayingActivity: (message: Message) -> Unit
 
 ) {
+    val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+    val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
     val items by programmesViewModel.programmes.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxSize()
     ) {
         ReusableTop(
@@ -45,8 +53,9 @@ fun ProgrammesScreen(
         when (items.type) {
             Status.SUCCESS -> {
                 LazyColumn(
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(vertical = 16.dp)
+                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
                 ) {
                     items(items.data) { programme ->
                         ProgrammesItemRow(programme = programme)
@@ -58,7 +67,7 @@ fun ProgrammesScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(),
+                        .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -70,7 +79,7 @@ fun ProgrammesScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(),
+                        .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -84,6 +93,21 @@ fun ProgrammesScreen(
                 }
             }
 
+        }
+
+        if (mediaStarted) {
+            PlayingBar(
+                mediaState = mediaState,
+                message = mainActivity.getMessage()!!,
+                playbackClick = {
+                    mainActivity.playbackClick()
+                },
+                barClick = {
+                    navigateToPlayingActivity.invoke(mainActivity.getMessage()!!)
+                },
+                stopPlayback = {
+                    mainActivity.stopPlayback()
+                })
         }
 
     }
@@ -111,7 +135,7 @@ fun ProgrammesItemRow(
         )
 
         Column(
-            modifier = Modifier.padding(start = 4.dp),
+            modifier = Modifier.padding(start = 16.dp),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(

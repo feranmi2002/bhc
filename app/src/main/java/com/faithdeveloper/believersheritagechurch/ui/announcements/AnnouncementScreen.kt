@@ -8,6 +8,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -21,27 +23,34 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.faithdeveloper.believersheritagechurch.data.Util
 import com.faithdeveloper.believersheritagechurch.data.announcement.Announcement
+import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
+import com.faithdeveloper.believersheritagechurch.ui.MainActivity
+import com.faithdeveloper.believersheritagechurch.ui.messages.PlayingBar
 import com.faithdeveloper.believersheritagechurch.ui.messages_section.ReusableTop
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun AnnouncementScreen(
     announcement: Flow<PagingData<Announcement>>,
-
+    mainActivity: MainActivity,
+    navigateToPlayingActivity: (message: Message) -> Unit,
     onClick: (announcement: Announcement) -> Unit
 ) {
+    val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+    val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
     val lazyAnnouncements = announcement.collectAsLazyPagingItems()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
 
         ReusableTop(title = "Announcements")
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
+            modifier = Modifier.fillMaxSize()
+                .weight(1f),
+            contentPadding = PaddingValues(vertical = 8.dp, horizontal = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             when (lazyAnnouncements.loadState.refresh) {
@@ -121,6 +130,21 @@ fun AnnouncementScreen(
                 }
                 else -> {}
             }
+        }
+
+        if (mediaStarted) {
+            PlayingBar(
+                mediaState = mediaState,
+                message = mainActivity.getMessage()!!,
+                playbackClick = {
+                    mainActivity.playbackClick()
+                },
+                barClick = {
+                    navigateToPlayingActivity.invoke(mainActivity.getMessage()!!)
+                },
+                stopPlayback = {
+                    mainActivity.stopPlayback()
+                })
         }
     }
 }

@@ -17,15 +17,21 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     private lateinit var playingService: PlayingService
     private var mBound = false
     private lateinit var message: Message
-    private lateinit var viewmodel: PlayingServiceInterface
+    private var viewModel: PlayingServiceInterface? = null
+    private var mainActivity: MainActivityPlayingServiceInterface? = null
     private var servicePreviouslyStartedState by Delegates.notNull<Boolean>()
 
     init {
         servicePreviouslyStartedState = applicationContext.getPlayingServiceState()
+
+    }
+
+    override fun mainActivityInstance(mainActivity: MainActivityPlayingServiceInterface) {
+        this.mainActivity = mainActivity
     }
 
     override fun viewModelInstance(viewModel: PlayingServiceInterface) {
-        this.viewmodel = viewModel
+        this.viewModel = viewModel
     }
 
     private val serviceConnection = object : ServiceConnection {
@@ -36,13 +42,8 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
             playingService.repositoryInstance(this@PlayingRepositoryImpl)
             if (playingService.aMessageIsAlreadyPlaying()) {
                 if (playingService.getMessage().id == message.id) {
-                    if (playingService.mediasIsPlaying()) {
-                        viewmodel.playbackState(
-                            PlaybackState.PLAYING
-                        )
-                    } else {
-                        viewmodel.playbackState(PlaybackState.PAUSED)
-                    }
+                    viewModel?.playbackState(playingService.returnPlaybackState())
+                    mainActivity?.playbackState(playingService.returnPlaybackState())
                 } else {
                     playingService.stopMediaToRestartAnotherOne()
                     playingService.startPlaying(message)
@@ -50,6 +51,7 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
             } else {
                 playingService.startPlaying(message)
             }
+            mainActivity?.mediaStarted(true)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -58,15 +60,19 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     }
 
     override fun startService(message: Message) {
+        this.message = message
         if (servicePreviouslyStartedState) {
             bindService()
         } else {
             this.message = message
             val intent = Intent(applicationContext, PlayingService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) applicationContext.startForegroundService(
-                intent
-            )
-            else applicationContext.startService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(
+                    intent
+                )
+            } else {
+                applicationContext.startService(intent)
+            }
             bindService()
         }
     }
@@ -76,17 +82,19 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
         applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-    override fun unbindService() {
+    override fun unbindServiceFromViewModel() {
         mBound = false
         applicationContext.unbindService(serviceConnection)
     }
 
-    override fun unbind() {
+    override fun unbindServiceFromService() {
         if (mBound) {
-            unbindService()
+            unbindServiceFromViewModel()
         }
-        viewmodel.navigateBackwards()
+        mainActivity?.mediaStarted(false)
+        viewModel?.navigateBackwards()
     }
+
     override fun playbackPosition(): Int = if (this::playingService.isInitialized) {
         playingService.getCurrentPosition()
     } else 0
@@ -109,7 +117,10 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     }
 
     override fun endService() {
-        unbindService()
+        if (mBound) {
+            unbindServiceFromViewModel()
+        }
+        mainActivity?.mediaStarted(false)
         playingService.stopMediaPermanently()
     }
 
@@ -118,7 +129,8 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     }
 
     override fun playbackState(playbackState: PlaybackState) {
-        viewmodel.playbackState(playbackState)
+        viewModel?.playbackState(playbackState)
+        mainActivity?.playbackState(playbackState)
     }
 
     override fun pauseDueToSlider() {
@@ -128,4 +140,7 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     override fun setPlayingSpeed(playingSpeed: PlayingSpeed) {
         playingService.setPlayingSpeed(playingSpeed)
     }
+
+    override fun getMessage() = message
+
 }

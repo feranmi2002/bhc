@@ -15,47 +15,56 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.faithdeveloper.believersheritagechurch.R
 import com.faithdeveloper.believersheritagechurch.data.LoadType
 import com.faithdeveloper.believersheritagechurch.data.Util
 import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
+import com.faithdeveloper.believersheritagechurch.ui.MainActivity
 import com.faithdeveloper.believersheritagechurch.viewmodel.MessageViewModel
 
 
 @Composable
 fun MessagesScreen(
     messageViewModel: MessageViewModel,
-    modifier: Modifier = Modifier,
     onClick: (message: Message) -> Unit,
     loadTypeSelected: (loadType: LoadType) -> Unit,
     onSearchTextChange: (text: String) -> Unit,
-    onSearch: () -> Unit
+    onSearch: () -> Unit,
+    mainActivity: MainActivity,
+    navigateToPlayingActivity: (message:Message) -> Unit
+
 ) {
+    val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+    val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
     val lazyPagingMessages = messageViewModel.messages.collectAsLazyPagingItems()
     val loadType by messageViewModel.loadType.collectAsState()
     val searchText by messageViewModel.searchText.collectAsState()
 
-    var searchVisible by rememberSaveable() {
+    var searchVisible by rememberSaveable {
         mutableStateOf(false)
     }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
         if (searchVisible) {
             ReusableSearch(
@@ -74,7 +83,7 @@ fun MessagesScreen(
             )
         } else {
             Top(
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 16.dp),
                 title = messageViewModel.messageType
             ) {
                 searchVisible = true
@@ -84,8 +93,12 @@ fun MessagesScreen(
         ChipGroup(selectedType = loadType, onSelectedChange = {
             loadTypeSelected.invoke(it)
         })
+
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp)
+                .weight(1f),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -97,7 +110,10 @@ fun MessagesScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Text(text = "No Internet Connection", color = MaterialTheme.colorScheme.error)
+                            Text(
+                                text = "No Internet Connection",
+                                color = MaterialTheme.colorScheme.error
+                            )
                             Button(
                                 onClick = { lazyPagingMessages.retry() },
                                 modifier = Modifier.wrapContentSize(align = Alignment.Center)
@@ -154,7 +170,10 @@ fun MessagesScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Text(text = "No Internet Connection", color = MaterialTheme.colorScheme.error)
+                            Text(
+                                text = "No Internet Connection",
+                                color = MaterialTheme.colorScheme.error
+                            )
                             Button(
                                 onClick = { lazyPagingMessages.retry() },
                                 modifier = Modifier.wrapContentSize(align = Alignment.Center)
@@ -164,13 +183,25 @@ fun MessagesScreen(
                         }
                     }
                 }
-
                 else -> Unit
             }
         }
 
+        if (mediaStarted) {
+            PlayingBar(
+                mediaState = mediaState,
+                message = mainActivity.getMessage()!!,
+                playbackClick = {
+                    mainActivity.playbackClick()
+                },
+                barClick = {
+                    navigateToPlayingActivity.invoke(mainActivity.getMessage()!!)
+                },
+                stopPlayback = {
+                   mainActivity.stopPlayback()
+                })
+        }
     }
-
 }
 
 
@@ -206,7 +237,7 @@ fun MessagesRow(message: Message, onClick: (message: Message) -> Unit) {
                 text = message.title,
                 style = MaterialTheme.typography.titleMedium
             )
-            if(message.description.isNotBlank()) {
+            if (message.description.isNotBlank()) {
                 Text(
                     modifier = Modifier.padding(bottom = 1.dp),
                     text = message.description,
@@ -271,7 +302,7 @@ fun ChipGroup(
     selectedType: LoadType,
     onSelectedChange: (loadType: LoadType) -> Unit
 ) {
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
         LazyRow {
             items(loadTypes) { it ->
                 Chip(
@@ -298,6 +329,7 @@ fun ReusableSearch(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
             .wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -325,6 +357,7 @@ fun ReusableSearch(
 
         Image(
             modifier = Modifier
+                .wrapContentWidth()
                 .clickable {
                     onCloseSearch.invoke()
                 }
@@ -356,5 +389,90 @@ fun Top(
         Image(modifier = Modifier.clickable {
             searchVisible.invoke()
         }, imageVector = Icons.Default.Search, contentDescription = null)
+    }
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun PlayingBar(
+    mediaState: PlaybackState,
+    message: Message,
+    playbackClick: () -> Unit,
+    stopPlayback: () -> Unit,
+    barClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable {
+                barClick.invoke()
+            },
+        color = MaterialTheme.colorScheme.primary
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (mediaState == PlaybackState.BUFFERING) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(40.dp),
+                    color = Color.Black
+                )
+            } else {
+                Image(
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .clickable {
+                            playbackClick.invoke()
+                        },
+                    painter = painterResource(
+                        id = when (mediaState) {
+                            PlaybackState.PLAYING -> R.drawable.ic_round_pause_24
+                            PlaybackState.PAUSED -> R.drawable.ic_round_play_arrow_24
+                            PlaybackState.FINISHED -> R.drawable.ic_round_play_arrow_24
+                            PlaybackState.FAILED -> R.drawable.ic_round_play_arrow_24
+                            else -> 0
+                        }
+
+                    ), contentDescription = null
+                )
+            }
+
+            Text(
+                text = message.title,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+
+            Image(
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .clickable {
+                        stopPlayback.invoke()
+                    },
+                painter = painterResource(id = R.drawable.ic_baseline_close_24),
+                contentDescription = "Close"
+            )
+
+            GlideImage(
+                model = message.imageLink,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            )
+
+
+        }
     }
 }

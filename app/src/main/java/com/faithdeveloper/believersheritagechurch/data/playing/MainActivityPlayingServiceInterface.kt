@@ -1,7 +1,7 @@
 package com.faithdeveloper.believersheritagechurch.data.playing
 
-interface RepositoryServiceInterface {
+interface MainActivityPlayingServiceInterface {
     fun playbackState(playbackState: PlaybackState)
-    fun unbindServiceFromService()
+    fun mediaStarted(state:Boolean)
 
 }

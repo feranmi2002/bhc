@@ -32,52 +32,67 @@ import com.faithdeveloper.believersheritagechurch.viewmodel.*
 
 @Composable
 fun AppNavGraph(
+    mainActivity: MainActivity,
     appContainer: AppContainer,
     modifier: Modifier,
-    navController: NavHostController,
-    startDestination: String = AppDestinations.Home.route
+    navController: NavHostController
 ) {
     var loadScreen = false
 
     NavHost(
-        navController = navController, startDestination = startDestination, modifier = modifier
+        navController = navController,
+        startDestination = AppDestinations.Home.route,
+        modifier = modifier
     ) {
-
 
         composable(AppDestinations.Home.route) {
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.provideFactory(appContainer.homeRepository)
             )
+            HomeRoute(
+                homeViewModel = homeViewModel,
+                navigateTo = {
+                    when (it) {
+                        AppDestinations.MessagesSection -> {
+                            AppNavigationActions.navigateToMessagesSection(navController)
 
-            HomeRoute(homeViewModel = homeViewModel, onClickSliderImage = { imageSliderImage ->
-                AppNavigationActions.navigateToImageViewer(navController, imageSliderImage)
-            }, navigateTo = {
-                when (it) {
-                    AppDestinations.MessagesSection -> {
-                        AppNavigationActions.navigateToMessagesSection(navController)
+                        }
+                        AppDestinations.About -> {
+                            AppNavigationActions.navigateToAbout(navController)
+
+                        }
+                        AppDestinations.Announcements -> {
+                            AppNavigationActions.navigateToAnnouncement(navController)
+
+                        }
+                        AppDestinations.Programmes -> {
+                            AppNavigationActions.navigateToProgrammes(navController)
+
+                        }
+                        else -> {
+                            //                         do nothing
+                        }
                     }
-                    AppDestinations.About -> {
-                        AppNavigationActions.navigateToAbout(navController)
-                    }
-                    AppDestinations.Announcements -> {
-                        AppNavigationActions.navigateToAnnouncement(navController)
-                    }
-                    AppDestinations.Programmes -> {
-                        AppNavigationActions.navigateToProgrammes(navController)
-                    }
-                    else -> {
-//                         do nothing
-                    }
+                },
+                onClickSliderImage = { imageSliderImage ->
+                    AppNavigationActions.navigateToImageViewer(navController, imageSliderImage)
+                }, mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
                 }
-            })
+            )
         }
 
         composable(AppDestinations.Programmes.route) {
             val programmesViewModel: ProgrammesViewModel = viewModel(
                 factory = ProgrammesViewModel.provideFactory(appContainer.programmesRepository)
             )
-
-            ProgrammesRoute(programmesViewModel = programmesViewModel)
+            ProgrammesRoute(programmesViewModel = programmesViewModel, mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                })
         }
 
         composable(AppDestinations.MessagesSection.route) {
@@ -87,10 +102,15 @@ fun AppNavGraph(
             )
 
             MessagesSectionRoute(
-                messageSectionViewModel = messageSectionViewModel
-            ) { messageType ->
-                AppNavigationActions.navigateToMessages(navController, messageType)
-            }
+                messageSectionViewModel = messageSectionViewModel,
+                { messageType ->
+                    AppNavigationActions.navigateToMessages(navController, messageType)
+                }, mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                }
+            )
         }
 
         composable(
@@ -106,12 +126,19 @@ fun AppNavGraph(
                     )!!
                 )
             )
+
             MessagesRoute(
-                messageViewModel = messageViewModel
-            ) { message ->
-                loadScreen = true
-                AppNavigationActions.navigateToPlayingMessage(navController, message)
-            }
+                messageViewModel = messageViewModel,
+                { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                },
+                mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                }
+            )
         }
 
         composable(
@@ -122,22 +149,29 @@ fun AppNavGraph(
         ) { navBackStackEntry ->
             val playingViewModel: PlayingViewModel = viewModel(
                 factory = PlayingViewModel.provideFactory(
-                    appContainer.playingRepository,
+                    mainActivity.playingRepository ?: appContainer.playingRepository,
+
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
                         navBackStackEntry.arguments?.getParcelable(MESSAGE_DATA)!!
                     else navBackStackEntry.arguments?.getParcelable(
                         MESSAGE_DATA,
                         Message::class.java
                     )!!,
+
                     appContainer.downloadRepository
                 )
             )
             if (loadScreen) {
                 PlayingRoute(
-                    onClickBack = {
+                    playingViewModel = playingViewModel,
+                    {
                         loadScreen = false
                         AppNavigationActions.clickBack(navController)
-                    }, playingViewModel = playingViewModel
+                    },
+
+                    setMainActivityPlayingRepository = { playingRepository ->
+                        mainActivity.playingRepositorySet(playingRepository)
+                    }
                 )
             }
         }
@@ -146,7 +180,12 @@ fun AppNavGraph(
             val announcementViewModel: AnnouncementViewModel = viewModel(
                 factory = AnnouncementViewModel.provideFactory(appContainer.announcementRepository)
             )
-            AnnouncementRoute(announcementViewModel = announcementViewModel) { announcement ->
+            AnnouncementRoute(announcementViewModel = announcementViewModel,
+                mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                }) { announcement ->
                 AppNavigationActions.navigateToAnnouncementDetails(navController, announcement)
             }
         }
@@ -163,7 +202,12 @@ fun AppNavGraph(
                 else navBackStackEntry.arguments?.getParcelable(
                     ANNOUNCEMENT_DETAIL_ARG,
                     Announcement::class.java
-                )!!
+                )!!,
+                mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                }
             )
         }
 
@@ -171,23 +215,37 @@ fun AppNavGraph(
             val aboutViewModel: AboutViewModel = viewModel(
                 factory = AboutViewModel.provideFactory(appContainer.aboutRepository)
             )
-            AboutListScreenRoute(aboutViewModel = aboutViewModel) { aboutItem ->
-                AppNavigationActions.navigateToAboutDetails(navController, aboutItem)
-            }
+            AboutListScreenRoute(
+                aboutViewModel = aboutViewModel,
+                { aboutItem ->
+                    AppNavigationActions.navigateToAboutDetails(navController, aboutItem)
+
+                }, mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                }
+            )
         }
 
         composable(AppDestinations.AboutDetails.route + "/{$ABOUT_ITEM_ARG}",
             arguments = listOf(navArgument(ABOUT_ITEM_ARG) {
                 type = AboutNavType()
             }
-            )) { navBackStackEntry ->
+            ))
+        { navBackStackEntry ->
+
             AboutDetailsRoute(
                 aboutItem = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
                     navBackStackEntry.arguments?.getParcelable(ABOUT_ITEM_ARG)!!
                 else navBackStackEntry.arguments?.getParcelable(
                     ABOUT_ITEM_ARG,
                     AboutItem::class.java
-                )!!
+                )!!, mainActivity = mainActivity,
+                navigateToPlayingActivity = { message ->
+                    loadScreen = true
+                    AppNavigationActions.navigateToPlayingMessage(navController, message)
+                }
             )
         }
 

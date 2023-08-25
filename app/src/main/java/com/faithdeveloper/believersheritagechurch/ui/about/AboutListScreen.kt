@@ -10,11 +10,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.faithdeveloper.believersheritagechurch.data.about.AboutItem
+import com.faithdeveloper.believersheritagechurch.data.messages.Message
+import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
+import com.faithdeveloper.believersheritagechurch.ui.MainActivity
+import com.faithdeveloper.believersheritagechurch.ui.messages.PlayingBar
 import com.faithdeveloper.believersheritagechurch.ui.messages_section.ReusableTop
 import com.faithdeveloper.believersheritagechurch.utils.Status
 import com.faithdeveloper.believersheritagechurch.viewmodel.AboutViewModel
@@ -23,20 +28,30 @@ import com.faithdeveloper.believersheritagechurch.viewmodel.AboutViewModel
 fun AboutListScreen(
     aboutViewModel: AboutViewModel,
     itemClick: (aboutItem: AboutItem) -> Unit,
-    retry: () -> Unit
+    retry: () -> Unit,
+    mainActivity: MainActivity,
+    navigateToPlayingActivity: (message: Message) -> Unit
 ) {
+    val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+    val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
     val aboutItems by aboutViewModel.aboutList.collectAsStateWithLifecycle()
+
     Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxSize()
     ) {
+
         ReusableTop(title = "About")
+
         when (aboutItems.type) {
+
             Status.SUCCESS -> {
                 LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(vertical = 16.dp)
+                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
                 ) {
                     items(aboutItems.data) { aboutItem ->
                         AboutListItemRow(aboutItem = aboutItem, itemClick = {
@@ -50,7 +65,7 @@ fun AboutListScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(),
+                        .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -62,7 +77,7 @@ fun AboutListScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(),
+                        .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -76,6 +91,21 @@ fun AboutListScreen(
                 }
             }
 
+        }
+
+        if (mediaStarted) {
+            PlayingBar(
+                mediaState = mediaState,
+                message = mainActivity.getMessage()!!,
+                playbackClick = {
+                    mainActivity.playbackClick()
+                },
+                barClick = {
+                    navigateToPlayingActivity.invoke(mainActivity.getMessage()!!)
+                },
+                stopPlayback = {
+                    mainActivity.stopPlayback()
+                })
         }
 
     }
