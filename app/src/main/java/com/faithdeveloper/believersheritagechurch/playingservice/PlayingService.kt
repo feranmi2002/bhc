@@ -208,7 +208,6 @@ class PlayingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildNotification().build())
         return super.onStartCommand(intent, flags, startId)
-
     }
 
     override fun onDestroy() {
@@ -385,7 +384,7 @@ class PlayingService : Service() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         return PendingIntent.getActivity(
-            this, 300, appIntent, PendingIntent.FLAG_CANCEL_CURRENT
+            this, 300, appIntent, PendingIntent.FLAG_IMMUTABLE
         )
     }
 
