@@ -1,9 +1,11 @@
 package com.faithdeveloper.believersheritagechurch.ui.playing
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +13,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -44,6 +48,7 @@ fun PlayingScreen(
     stopMedia: () -> Unit,
     speedPlay: () -> Unit
 ) {
+
     DisposableEffect(key1 = playingViewModel) {
         onDispose {
             playingScreenLeft.invoke()
@@ -51,14 +56,29 @@ fun PlayingScreen(
     }
 
     val message = playingViewModel.message
+
     val playbackState by playingViewModel.playbackState.observeAsState(initial = PlaybackState.BUFFERING)
+
     val playbackPosition: Int by playingViewModel.playbackPosition.collectAsStateWithLifecycle(
         initialValue = 0
     )
+
     val downloadStatus by playingViewModel.downloadStatus.observeAsState(initial = DownloadStatus.UNDOWNLOADED)
+
     val navigateBackwards by playingViewModel.navigateBackwards.observeAsState(false)
 
     val playingSpeed by playingViewModel.playingSpeed.observeAsState()
+
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val angle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
 
     if (navigateBackwards) {
         onClickBack.invoke()
@@ -70,20 +90,33 @@ fun PlayingScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Top(message.title)
+
         GlideImage(
             contentScale = ContentScale.FillBounds,
             alignment = Alignment.Center,
             model = message.imageLink,
-            modifier = Modifier
-                .weight(0.5f)
-                .clickable(false) {},
+            modifier = if (playbackState == PlaybackState.PLAYING) {
+                Modifier
+                    .weight(0.5f)
+                    .clip(CircleShape)
+                    .size(250.dp)
+                    .rotate(angle)
+            } else {
+                Modifier
+                    .weight(0.5f)
+                    .clip(CircleShape)
+                    .size(250.dp)
+            },
             contentDescription = null
         )
+
         MessageDescription(
             preacher = message.preacher,
             description = message.description
         )
+
         TimeCount(
             length = message.length,
             playbackState = playbackState,
@@ -91,6 +124,7 @@ fun PlayingScreen(
             onSliderInteraction = onSliderInteraction,
             pauseDueToSlider = pauseDueToSlider
         )
+
         PlayingControls(
             playbackStateAction = playbackStateAction,
             onDownload = onDownload,
