@@ -18,7 +18,6 @@ class PlayingViewModel private constructor(
     private val downloadRepository: DownloadRepository
 ) : ViewModel(), PlayingServiceInterface, DownloadInterface {
     private val refreshInterval = 500L
-    private var stopMedia = false
 
     init {
         playingRepository.viewModelInstance(this)
@@ -33,10 +32,10 @@ class PlayingViewModel private constructor(
     val downloadStatus: LiveData<DownloadStatus> get() = mdownloadStatus
 
     private val _navigateBackwards = MutableLiveData(false)
-    val navigateBackwards:LiveData<Boolean> get() = _navigateBackwards
+    val navigateBackwards: LiveData<Boolean> get() = _navigateBackwards
 
     private val _playingSpeed = MutableLiveData(PlayingSpeed.ONE_X)
-    val playingSpeed:LiveData<PlayingSpeed> get() = _playingSpeed
+    val playingSpeed: LiveData<PlayingSpeed> get() = _playingSpeed
 
 
     var playbackPosition = flow {
@@ -113,9 +112,6 @@ class PlayingViewModel private constructor(
     }
 
     override fun onCleared() {
-        if (!stopMedia) {
-            playingRepository.unbindServiceFromViewModel()
-        }
         downloadRepository.unregisterReceiver()
         super.onCleared()
     }
@@ -143,7 +139,6 @@ class PlayingViewModel private constructor(
     }
 
     override fun navigateBackwards() {
-        stopMedia = true
         _navigateBackwards.value = true
     }
 
@@ -152,12 +147,11 @@ class PlayingViewModel private constructor(
     }
 
     fun stopMedia() {
-        stopMedia = true
         playingRepository.endService()
     }
 
-    fun speedPlay(){
-        when(playingSpeed.value!!){
+    fun speedPlay() {
+        when (playingSpeed.value!!) {
             PlayingSpeed.ONE_X -> {
                 _playingSpeed.value = PlayingSpeed.ONE_FIVE_X
             }
@@ -171,6 +165,11 @@ class PlayingViewModel private constructor(
             }
         }
         playingRepository.setPlayingSpeed(playingSpeed.value!!)
+    }
+
+    fun pollDataFromAlreadySetPlayingRepository() {
+        mplaybackState.value = playingRepository.getPlaybackState()
+        _playingSpeed.value = playingRepository.getPlayingSpeed()
     }
 
     @Suppress("UNCHECKED_CAST")

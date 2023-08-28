@@ -37,13 +37,11 @@ import com.faithdeveloper.believersheritagechurch.ui.MainActivity
 import com.faithdeveloper.believersheritagechurch.utils.AppPreferences.storePlayingMessage
 import com.faithdeveloper.believersheritagechurch.utils.AppPreferences.storePlayingServiceState
 import com.faithdeveloper.believersheritagechurch.utils.NotificationUtil
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
-import kotlin.random.Random
 
 class PlayingService : Service() {
 
@@ -129,10 +127,6 @@ class PlayingService : Service() {
                 .setOnAudioFocusChangeListener(audioFocusChangeListener).build()
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequestResult = audioManager.requestAudioFocus(audioFocusRequest)
-        }
-
         mediaPlayerErrorListener = OnErrorListener { _, _, _ ->
             mediaPlaybackError()
             return@OnErrorListener true
@@ -157,16 +151,15 @@ class PlayingService : Service() {
 
         mediaPlayerPreparedListener = OnPreparedListener { mediaPlayer ->
             synchronized(mFocusLOck) {
-                if (audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    setPlaybackState(PlaybackState.PLAYING)
-                    mediaPlayer.start()
-                    playbackPauseType = PlaybackPauseTypes.PLAY
-                    notificationView?.setImageViewResource(
-                        R.id.play_pause, R.drawable.ic_round_pause_24
-                    )
-                    NotificationManagerCompat.from(this@PlayingService).apply {
-                        notify(NOTIFICATION_ID, buildNotification().build())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    audioFocusRequestResult = audioManager.requestAudioFocus(audioFocusRequest)
+                    if (audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                        mediaPreparedToStart(mediaPlayer)
+                    } else {
+                        setPlaybackState(PlaybackState.PAUSED)
                     }
+                } else {
+                    mediaPreparedToStart(mediaPlayer)
                 }
             }
         }
@@ -203,6 +196,19 @@ class PlayingService : Service() {
         )
 
         super.onCreate()
+    }
+
+    private fun mediaPreparedToStart(mediaPlayer: MediaPlayer) {
+        setPlaybackState(PlaybackState.PLAYING)
+        mediaPlayer.playbackParams = mediaPlayer.playbackParams.setSpeed(1.0f)
+        mediaPlayer.start()
+        playbackPauseType = PlaybackPauseTypes.PLAY
+        notificationView?.setImageViewResource(
+            R.id.play_pause, R.drawable.ic_round_pause_24
+        )
+        NotificationManagerCompat.from(this@PlayingService).apply {
+            notify(NOTIFICATION_ID, buildNotification().build())
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -312,8 +318,8 @@ class PlayingService : Service() {
     }
 
     private fun stopPlayingService() {
-//        in case the call to close service is from notification
-        repositoryServiceInterface.unbindServiceFromService()
+
+        repositoryServiceInterface.unbindService()
 
         applicationContext.storePlayingServiceState(started = false)
 
@@ -335,18 +341,27 @@ class PlayingService : Service() {
 
     fun resumeMedia() {
         synchronized(mFocusLOck) {
-            if (audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                wifiLock.acquire()
-                mediaPlayer?.start()
-                setPlaybackState(PlaybackState.PLAYING)
-                playbackPauseType = PlaybackPauseTypes.PLAY
-                notificationView?.setImageViewResource(
-                    R.id.play_pause, R.drawable.ic_round_pause_24
-                )
-                NotificationManagerCompat.from(this@PlayingService).apply {
-                    notify(NOTIFICATION_ID, buildNotification().build())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                audioFocusRequestResult = audioManager.requestAudioFocus(audioFocusRequest)
+                if (audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    mediaResumption()
                 }
+            } else {
+                mediaResumption()
             }
+        }
+    }
+
+    private fun mediaResumption() {
+        wifiLock.acquire()
+        mediaPlayer?.start()
+        setPlaybackState(PlaybackState.PLAYING)
+        playbackPauseType = PlaybackPauseTypes.PLAY
+        notificationView?.setImageViewResource(
+            R.id.play_pause, R.drawable.ic_round_pause_24
+        )
+        NotificationManagerCompat.from(this@PlayingService).apply {
+            notify(NOTIFICATION_ID, buildNotification().build())
         }
     }
 
@@ -374,18 +389,6 @@ class PlayingService : Service() {
     private fun setPlaybackState(playbackState: PlaybackState) {
         this.playbackState = playbackState
         repositoryServiceInterface.playbackState(playbackState)
-    }
-
-
-    private fun buildContentIntent(): PendingIntent? {
-        val appIntent = Intent(this, MainActivity::class.java).apply {
-            putExtra("$packageName NEW_ACTIVITY", Gson().toJson(message))
-            action = Random.nextInt().toString()
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        return PendingIntent.getActivity(
-            this, 300, appIntent, PendingIntent.FLAG_IMMUTABLE
-        )
     }
 
     private fun buildNotificationLayout(): RemoteViews {
@@ -455,7 +458,7 @@ class PlayingService : Service() {
     private fun updateNotificationLayout() {
         notificationView!!.setTextViewText(R.id.title, message.title)
         notificationView!!.setTextViewText(R.id.preacher, message.preacher)
-        val notification = buildNotification().setContentIntent(buildContentIntent()).build()
+        val notification = buildNotification().build()
         NotificationManagerCompat.from(this).apply {
             notify(NOTIFICATION_ID, notification)
         }
@@ -464,15 +467,28 @@ class PlayingService : Service() {
 
 
     private fun buildNotification(): NotificationCompat.Builder {
+        val appIntent = Intent(this, MainActivity::class.java).apply {
+            putExtra("$packageName NEW_ACTIVITY", true)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val notifyIntent = PendingIntent.getActivity(
+            this, 0, appIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(
             this, NotificationUtil.PLAYING_MESSAGE_NOTIFICATION_CHANNEL_ID
         ).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setForegroundServiceBehavior(FOREGROUND_SERVICE_IMMEDIATE)
             .setCustomContentView(buildNotificationLayout())
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle()).setAutoCancel(false)
-            .setChannelId(NotificationUtil.PLAYING_MESSAGE_NOTIFICATION_CHANNEL_ID).setOngoing(true)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setAutoCancel(false)
+            .setChannelId(NotificationUtil.PLAYING_MESSAGE_NOTIFICATION_CHANNEL_ID)
+            .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setSmallIcon(R.mipmap.ic_launcher_round).setSilent(true)
+            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setSilent(true)
+            .setContentIntent(notifyIntent)
     }
 
     fun setPlayingSpeed(playingSpeed: PlayingSpeed) {
@@ -488,6 +504,18 @@ class PlayingService : Service() {
             }
         }
         mediaPlayer?.playbackParams = mediaPlayer!!.playbackParams.setSpeed(speed)
+    }
+
+    fun getPlayingSpeed() = when(mediaPlayer?.playbackParams!!.speed){
+        1.0f -> {
+            PlayingSpeed.ONE_X
+        }
+        1.5f -> {
+            PlayingSpeed.ONE_FIVE_X
+        }
+        else -> {
+            PlayingSpeed.TWO_X
+        }
     }
 
     fun returnPlaybackState() = playbackState

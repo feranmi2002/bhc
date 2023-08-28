@@ -2,18 +2,22 @@ package com.faithdeveloper.believersheritagechurch.ui.playing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.faithdeveloper.believersheritagechurch.data.playing.PlayingRepository
+import com.faithdeveloper.believersheritagechurch.ui.MainActivity
 import com.faithdeveloper.believersheritagechurch.viewmodel.PlayingViewModel
 
 @Composable
 fun PlayingRoute(
     playingViewModel: PlayingViewModel,
     onClickBack: () -> Unit,
-    setMainActivityPlayingRepository: (playingRepository:PlayingRepository) -> Unit
+    mainActivity: MainActivity
 ) {
-    LaunchedEffect(key1 = playingViewModel ) {
-        playingViewModel.startMedia()
-        setMainActivityPlayingRepository.invoke(playingViewModel.playingRepository)
+    LaunchedEffect(key1 = playingViewModel) {
+        if (mainActivity.playingRepository == null) {
+            playingViewModel.startMedia()
+            mainActivity.playingRepositorySet(playingRepository = playingViewModel.playingRepository)
+        }else {
+            playingViewModel.pollDataFromAlreadySetPlayingRepository()
+        }
     }
 
     PlayingScreen(

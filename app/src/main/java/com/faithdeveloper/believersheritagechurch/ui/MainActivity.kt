@@ -72,6 +72,7 @@ class MainActivity : ComponentActivity(), MainActivityPlayingServiceInterface {
         _mediaStarted.value = state
         if (!state) {
             playingRepository = null
+            initialPlayingMessage = null
         }
 
     }
@@ -116,5 +117,7 @@ class MainActivity : ComponentActivity(), MainActivityPlayingServiceInterface {
 
     fun stopPlayback(){
         playingRepository?.endService()
+        playingRepository = null
+        initialPlayingMessage = null
     }
 }

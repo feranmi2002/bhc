@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,7 +13,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -69,17 +67,6 @@ fun PlayingScreen(
 
     val playingSpeed by playingViewModel.playingSpeed.observeAsState()
 
-    val infiniteTransition = rememberInfiniteTransition()
-
-    val angle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
     if (navigateBackwards) {
         onClickBack.invoke()
     }
@@ -93,24 +80,21 @@ fun PlayingScreen(
 
         Top(message.title)
 
-        GlideImage(
-            contentScale = ContentScale.FillBounds,
-            alignment = Alignment.Center,
-            model = message.imageLink,
-            modifier = if (playbackState == PlaybackState.PLAYING) {
-                Modifier
-                    .weight(0.5f)
-                    .clip(CircleShape)
-                    .size(250.dp)
-                    .rotate(angle)
-            } else {
-                Modifier
-                    .weight(0.5f)
-                    .clip(CircleShape)
-                    .size(250.dp)
-            },
-            contentDescription = null
-        )
+        Row(modifier = Modifier.fillMaxWidth()
+            .weight(0.5f),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically) {
+            GlideImage(
+                contentScale = ContentScale.FillBounds,
+                alignment = Alignment.Center,
+                model = message.imageLink,
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(300.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentDescription = null
+            )
+        }
 
         MessageDescription(
             preacher = message.preacher,
