@@ -221,7 +221,9 @@ fun TimeCount(
             value = sliderPosition,
             valueRange = 0F..length.toFloat(),
             onValueChangeFinished = {
-                onSliderInteraction.invoke(sliderPosition)
+                if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.PAUSED) {
+                    onSliderInteraction.invoke(sliderPosition)
+                }
             },
             onValueChange = {
                 if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.PAUSED) {
