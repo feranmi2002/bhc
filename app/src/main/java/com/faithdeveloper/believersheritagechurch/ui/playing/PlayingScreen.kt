@@ -421,7 +421,7 @@ fun InfoDialog(message: Message, showDialog: (Boolean) -> Unit) {
                 }
 
                 item {
-                    DialogInfoItem(title = "Date", item = "${message.date}")
+                    DialogInfoItem(title = "Date", item = Util.formatDate(message.date))
                 }
 
                 item {
