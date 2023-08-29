@@ -19,9 +19,8 @@ fun MessagesSectionRoute(
         retry = {
             messageSectionViewModel.retry()
         },
-        mainActivity = mainActivity,
-        navigateToPlayingActivity = {
-            navigateToPlayingActivity.invoke(it)
-        }
-    )
+        mainActivity = mainActivity
+    ) {
+        navigateToPlayingActivity.invoke(it)
+    }
 }

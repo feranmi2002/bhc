@@ -4,7 +4,6 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.faithdeveloper.believersheritagechurch.data.AppContainerImpl
@@ -34,7 +33,6 @@ class MainActivity : ComponentActivity(), MainActivityPlayingServiceInterface {
 
     private var initialPlayingMessage: String? = null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val appContainer = AppContainerImpl(this, Firebase.firestore)
         initialPlayingMessage = applicationContext.getPlayingMessage()
@@ -55,8 +53,6 @@ class MainActivity : ComponentActivity(), MainActivityPlayingServiceInterface {
         this.createNotificationChannels()
 
         FirebaseAnalytics.getInstance(this).setAnalyticsCollectionEnabled(true)
-
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         setContent {
             App(appContainer, mainActivity = this@MainActivity)

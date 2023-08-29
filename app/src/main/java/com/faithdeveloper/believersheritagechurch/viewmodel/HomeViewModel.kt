@@ -1,6 +1,5 @@
 package com.faithdeveloper.believersheritagechurch.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,7 +13,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.*
 
-class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
+class HomeViewModel(private val homeRepository: HomeRepository?) : ViewModel() {
+
+    constructor() : this(null)
 
     private val _imageSliderImages =
         MutableStateFlow(Result<ImageSliderImage>(Status.LOADING, emptyList()))
@@ -24,7 +25,7 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
 
     fun getImageSliderImages() {
         viewModelScope.launch {
-            homeRepository.getImageSliderImages().collectLatest {
+            homeRepository!!.getImageSliderImages().collectLatest {
                 _imageSliderImages.value = it
             }
         }

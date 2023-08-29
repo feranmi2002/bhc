@@ -3,6 +3,7 @@ package com.faithdeveloper.believersheritagechurch.ui.announcements
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,7 +52,7 @@ fun AnnouncementScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
                 .weight(1f),
-            contentPadding = PaddingValues(vertical = 8.dp, horizontal = 32.dp),
+            contentPadding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             when (lazyAnnouncements.loadState.refresh) {
@@ -82,7 +84,9 @@ fun AnnouncementScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
 
                     }
@@ -124,7 +128,9 @@ fun AnnouncementScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
                 }
@@ -176,13 +182,13 @@ fun AnnouncementRow(announcement: Announcement, onClick: (announcement: Announce
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
+                    .clip(RoundedCornerShape(16.dp))
             )
         }
 
         if (announcement.description.isNotBlank()) {
             Column(
                 modifier = Modifier
-                    .padding(start = 8.dp)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(
                     1.dp,
@@ -194,11 +200,13 @@ fun AnnouncementRow(announcement: Announcement, onClick: (announcement: Announce
                     text = announcement.description,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
                     text = Util.formatDate(announcement.date),
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }

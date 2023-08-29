@@ -80,7 +80,8 @@ fun PlayingScreen(
 
         Top(message.title)
 
-        Row(modifier = Modifier.fillMaxWidth()
+        Row(modifier = Modifier
+            .fillMaxWidth()
             .weight(0.5f),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically) {
@@ -214,7 +215,8 @@ fun TimeCount(
                     pauseDueToSlider.invoke()
                     sliderPosition = it
                 }
-            }
+            },
+            colors = SliderDefaults.colors(thumbColor = Color.Black)
         )
         Text(
             text = Util.formatDuration(length),
@@ -269,7 +271,8 @@ fun PlayingControls(
                     PlayingSpeed.ONE_FIVE_X -> "1.5x"
                     PlayingSpeed.TWO_X -> "2x"
                 },
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
@@ -278,7 +281,7 @@ fun PlayingControls(
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(40.dp),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -317,7 +320,7 @@ fun PlayingControls(
                     modifier = Modifier
                         .size(24.dp)
                         .clickable(enabled = false) {},
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 

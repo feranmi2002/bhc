@@ -1,5 +1,6 @@
 package com.faithdeveloper.believersheritagechurch.ui.home
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -15,7 +16,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -42,10 +42,12 @@ fun HomeScreen(
     onClickSliderImage: (imageSliderImage: ImageSliderImage) -> Unit,
     retryLoadImages: () -> Unit,
     mainActivity: MainActivity,
-    navigateToPlayingActivity: (message: Message) -> Unit
+    navigateToPlayingActivity: (message: Message) -> Unit,
 ) {
     val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+
     val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
+
     val images by homeViewModel.imageSliderImages.collectAsStateWithLifecycle()
 
     Surface(
@@ -59,7 +61,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            TopStrip()
+            TopStrip(mainActivity = mainActivity)
 
             Card(
                 modifier = Modifier
@@ -77,6 +79,7 @@ fun HomeScreen(
                     retryLoadImages.invoke()
                 }
             }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,19 +107,18 @@ fun HomeScreen(
 }
 
 @Composable
-fun TopStrip() {
+fun TopStrip(mainActivity: MainActivity) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp),
+            .padding(start = 16.dp, top = 16.dp, end = 16.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "B.H.C",
             style = MaterialTheme.typography.titleLarge,
-
-            color = Color.White
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -202,6 +204,8 @@ fun Sections(
         }
 
         item {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
             SectionImage(
                 destination = AppDestinations.Announcements
             ) { destination ->
@@ -241,7 +245,7 @@ fun SectionImage(
             .clickable {
                 navigateTO.invoke(destination)
             },
-        color = Color.White,
+        color = MaterialTheme.colorScheme.onPrimary,
     ) {
         Column(
             modifier = Modifier.size(150.dp),
@@ -256,10 +260,11 @@ fun SectionImage(
             )
             Text(
                 text = destination.title,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleMedium
             )
         }
     }
 }
+
 

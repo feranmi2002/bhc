@@ -33,7 +33,6 @@ import com.faithdeveloper.believersheritagechurch.viewmodel.MessageSectionViewMo
 
 @Composable
 fun MessagesSectionScreen(
-    modifier: Modifier = Modifier,
     onClick: (messageType: String) -> Unit,
     messageSectionViewModel: MessageSectionViewModel,
     retry: () -> Unit,
@@ -41,8 +40,11 @@ fun MessagesSectionScreen(
     navigateToPlayingActivity: (message: Message) -> Unit
 ) {
     val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+
     val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
+
     val items by messageSectionViewModel.messageSections.collectAsStateWithLifecycle()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,7 +60,7 @@ fun MessagesSectionScreen(
                     modifier = Modifier
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
+                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp)
                 ) {
                     items(items.data) { messageSectionItem ->
                         MessageSectionRow(messageItem = messageSectionItem, onClick = onClick)
@@ -74,7 +76,9 @@ fun MessagesSectionScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
 
@@ -131,7 +135,7 @@ fun ReusableTop(
             text = title,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -140,7 +144,6 @@ fun ReusableTop(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MessageSectionRow(
-    modifier: Modifier = Modifier,
     messageItem: MessageSectionItems,
     onClick: (messageType: String) -> Unit
 ) {

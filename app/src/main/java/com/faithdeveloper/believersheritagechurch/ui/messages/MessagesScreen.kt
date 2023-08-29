@@ -10,9 +10,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -54,20 +51,25 @@ fun MessagesScreen(
 
 ) {
     val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+
     val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
+
     val lazyPagingMessages = messageViewModel.messages.collectAsLazyPagingItems()
+
     val loadType by messageViewModel.loadType.collectAsState()
+
     val searchText by messageViewModel.searchText.collectAsState()
 
     var searchVisible by rememberSaveable {
         mutableStateOf(false)
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         if (searchVisible) {
-            ReusableSearch(
+            Search(
                 searchText = searchText,
                 onSearchTextChange = {
                     onSearchTextChange.invoke(it)
@@ -131,7 +133,9 @@ fun MessagesScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
 
                     }
@@ -318,8 +322,9 @@ fun ChipGroup(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReusableSearch(
+fun Search(
     searchText: String,
     onSearchTextChange: (text: String) -> Unit,
     onCloseSearch: () -> Unit,
@@ -341,6 +346,13 @@ fun ReusableSearch(
             onValueChange = {
                 onSearchTextChange.invoke(it)
             },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimary,
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimary,
+                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+            ) ,
             placeholder = { Text(text = "Search $title") },
             singleLine = true,
             keyboardActions = KeyboardActions(onSearch = {
@@ -362,7 +374,7 @@ fun ReusableSearch(
                     onCloseSearch.invoke()
                 }
                 .padding(start = 8.dp),
-            imageVector = Icons.Default.Close,
+            painter = painterResource(id = R.drawable.ic_baseline_search_24),
             contentDescription = "Close Search"
         )
 
@@ -384,11 +396,11 @@ fun Top(
             textAlign = TextAlign.Center,
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onPrimary
         )
         Image(modifier = Modifier.clickable {
             searchVisible.invoke()
-        }, imageVector = Icons.Default.Search, contentDescription = null)
+        }, painter = painterResource(id = R.drawable.ic_baseline_search_24), contentDescription = null)
     }
 }
 
@@ -422,7 +434,7 @@ fun PlayingBar(
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(40.dp),
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
                 Image(

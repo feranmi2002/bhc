@@ -17,13 +17,13 @@ sealed class AppDestinations(val route: String,  val title: String, @DrawableRes
     object Home : AppDestinations(
         "home",
         "Home",
-        R.drawable.ic_round_home_24
+        R.drawable.bible_5006
     )
 
     object ImageViewer : AppDestinations(
         "imageviewer",
         "imageviewer",
-        R.drawable.ic_round_home_24
+        R.drawable.bible_5006
     )
 
     object MessagesSection : AppDestinations(

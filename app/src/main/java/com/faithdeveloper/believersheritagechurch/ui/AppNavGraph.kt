@@ -169,9 +169,7 @@ fun AppNavGraph(
                         AppNavigationActions.clickBack(navController)
                     },
 
-                    setMainActivityPlayingRepository = { playingRepository ->
-                        mainActivity.playingRepositorySet(playingRepository)
-                    }
+                    mainActivity = mainActivity
                 )
             }
         }

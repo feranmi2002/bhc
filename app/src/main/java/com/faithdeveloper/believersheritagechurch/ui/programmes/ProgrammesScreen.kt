@@ -39,7 +39,9 @@ fun ProgrammesScreen(
 
 ) {
     val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+
     val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
+
     val items by programmesViewModel.programmes.collectAsStateWithLifecycle()
 
     Column(
@@ -55,7 +57,7 @@ fun ProgrammesScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 32.dp)
+                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp)
                 ) {
                     items(items.data) { programme ->
                         ProgrammesItemRow(programme = programme)
@@ -71,7 +73,9 @@ fun ProgrammesScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
 

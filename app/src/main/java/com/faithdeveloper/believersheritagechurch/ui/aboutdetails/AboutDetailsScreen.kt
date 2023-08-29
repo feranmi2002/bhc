@@ -1,5 +1,6 @@
 package com.faithdeveloper.believersheritagechurch.ui.aboutdetails
 
+import android.content.res.Configuration
 import android.text.Html
 import android.util.TypedValue
 import android.widget.TextView
@@ -36,9 +37,12 @@ fun AboutDetailsScreen(
     navigateToPlayingActivity: (message: Message) -> Unit
 ) {
     val mediaStarted by mainActivity.mediaStarted.observeAsState(false)
+
     val mediaState by mainActivity.playbackState.observeAsState(PlaybackState.PAUSED)
 
+
     Column(modifier = Modifier.fillMaxSize()) {
+
 
         LazyColumn(
             modifier = Modifier
@@ -58,7 +62,7 @@ fun AboutDetailsScreen(
                         text = aboutItem.title,
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -77,6 +81,13 @@ fun AboutDetailsScreen(
                     it.typeface = ResourcesCompat.getFont(it.context, R.font.nunito_semi_bold)
                     it.text = Html.fromHtml(aboutItem.description, Html.FROM_HTML_MODE_COMPACT)
                     it.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+                    it.setTextColor(
+                        if ((mainActivity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                            mainActivity.resources.getColor(R.color.purple40)
+                        } else {
+                            mainActivity.resources.getColor(R.color.white)
+                        }
+                    )
                 })
             }
         }

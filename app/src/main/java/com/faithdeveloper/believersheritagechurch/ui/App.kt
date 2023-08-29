@@ -17,7 +17,7 @@ fun App(appContainer: AppContainer, mainActivity: MainActivity) {
         Surface(
             modifier = Modifier
                 .fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.primary
         ) {
             AppNavGraph(
                 mainActivity = mainActivity,
