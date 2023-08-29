@@ -80,11 +80,13 @@ fun PlayingScreen(
 
         Top(message.title)
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .weight(0.5f),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.5f),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             GlideImage(
                 contentScale = ContentScale.FillBounds,
                 alignment = Alignment.Center,
@@ -351,16 +353,13 @@ fun PlayingControls(
                 )
             }
         }
-
-        if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.PAUSED) {
-            Image(
-                modifier = Modifier.clickable {
-                    stopMedia.invoke()
-                },
-                painter = painterResource(id = R.drawable.ic_baseline_stop_24),
-                contentDescription = "Stop"
-            )
-        }
+        Image(
+            modifier = Modifier.clickable {
+                stopMedia.invoke()
+            },
+            painter = painterResource(id = R.drawable.ic_baseline_stop_24),
+            contentDescription = "Stop"
+        )
     }
 }
 
