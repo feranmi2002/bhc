@@ -11,19 +11,13 @@ import com.faithdeveloper.believersheritagechurch.R
 
 // Set of Material typography styles to start with
 val fonts = FontFamily(
-    Font(R.font.nunito_medium, FontWeight.Medium),
-    Font(R.font.nunito_regular, FontWeight.Normal),
-    Font(R.font.nunito_black, FontWeight.Black),
-    Font(R.font.nunito_extra_bold, FontWeight.ExtraBold),
-    Font(R.font.nunito_semi_bold, FontWeight.SemiBold),
-    Font(R.font.nunito_bold, FontWeight.Bold),
-    Font(R.font.nunito_light, FontWeight.Light),
-    Font(R.font.nunito_extra_light, FontWeight.ExtraLight)
+    Font(R.font.opensans_medium, FontWeight.Normal),
+    Font(R.font.opensans_semibold, FontWeight.Bold)
 )
 val Typography = Typography(
     bodySmall = TextStyle(
         fontFamily = fonts,
-        fontWeight = FontWeight.Light,
+        fontWeight = FontWeight.Normal,
         fontSize = 13.sp,
     ),
     bodyMedium = TextStyle(
@@ -48,7 +42,7 @@ val Typography = Typography(
     ),
     labelSmall = TextStyle(
         fontFamily = fonts,
-        fontWeight = FontWeight.Light,
+        fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
@@ -60,7 +54,7 @@ val Typography = Typography(
     ),
     titleSmall = TextStyle(
         fontFamily = fonts,
-        fontWeight = FontWeight.Light,
+        fontWeight = FontWeight.Bold,
         fontSize = 15.sp,
         color = Color.DarkGray
     ),
