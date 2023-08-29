@@ -426,20 +426,27 @@ fun InfoDialog(message: Message, showDialog: (Boolean) -> Unit) {
 
 @Composable
 fun DialogInfoItem(title: String, item: String) {
-    Column(
+    Surface(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.Start
+        color = MaterialTheme.colorScheme.primary
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontSize = 16.sp
-        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
 
-        Text(
-            text = item,
-            style = MaterialTheme.typography.bodyMedium,
-            fontSize = 15.sp
-        )
+            Text(
+                text = item,
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
