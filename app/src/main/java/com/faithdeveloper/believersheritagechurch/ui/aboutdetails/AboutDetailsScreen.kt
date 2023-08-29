@@ -78,7 +78,7 @@ fun AboutDetailsScreen(
                     .wrapContentHeight(), factory = {
                     TextView(it)
                 }, update = {
-                    it.typeface = ResourcesCompat.getFont(it.context, R.font.nunito_semi_bold)
+                    it.typeface = ResourcesCompat.getFont(it.context, R.font.opensans_regular)
                     it.text = Html.fromHtml(aboutItem.description, Html.FROM_HTML_MODE_COMPACT)
                     it.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
                     it.setTextColor(
