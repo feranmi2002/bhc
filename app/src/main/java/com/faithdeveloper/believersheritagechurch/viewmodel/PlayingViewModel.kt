@@ -172,6 +172,10 @@ class PlayingViewModel private constructor(
         _playingSpeed.value = playingRepository.getPlayingSpeed()
     }
 
+    fun stopMediaToRestartAnother() {
+        playingRepository.stopMediaToRestartAnother(message)
+    }
+
     @Suppress("UNCHECKED_CAST")
     companion object {
         fun provideFactory(

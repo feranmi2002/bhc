@@ -143,7 +143,7 @@ class PlayingService : Service() {
                 }
 
                 MEDIA_INFO_BUFFERING_END -> {
-                    setPlaybackState(PlaybackState.PLAYING)
+
                 }
             }
             return@OnInfoListener true
@@ -231,7 +231,12 @@ class PlayingService : Service() {
 
         storePlayingMessage(message.toString())
 
-        updateNotificationLayout()
+        try {
+            updateNotificationLayout()
+        }catch (e:Exception){
+            stopMediaPermanently()
+        }
+
 
         setPlaybackState(PlaybackState.BUFFERING)
 
@@ -393,7 +398,7 @@ class PlayingService : Service() {
 
     private fun buildNotificationLayout(): RemoteViews {
         if (notificationView == null) {
-            notificationView = RemoteViews(packageName, R.layout.playing_message)
+            notificationView = RemoteViews(packageName, R.layout.playing_notification)
         }
         val playPauseIntent = Intent(packageName).apply {
             type = REMOTE_INTENT_TYPE
@@ -456,6 +461,9 @@ class PlayingService : Service() {
     }
 
     private fun updateNotificationLayout() {
+        if (notificationView == null) {
+            notificationView = RemoteViews(packageName, R.layout.playing_notification)
+        }
         notificationView!!.setTextViewText(R.id.title, message.title)
         notificationView!!.setTextViewText(R.id.preacher, message.preacher)
         val notification = buildNotification().build()
@@ -481,7 +489,8 @@ class PlayingService : Service() {
         ).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setForegroundServiceBehavior(FOREGROUND_SERVICE_IMMEDIATE)
             .setCustomContentView(buildNotificationLayout())
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomBigContentView(buildNotificationLayout())
+            .setStyle(NotificationCompat.BigTextStyle())
             .setAutoCancel(false)
             .setChannelId(NotificationUtil.PLAYING_MESSAGE_NOTIFICATION_CHANNEL_ID)
             .setOngoing(true)
