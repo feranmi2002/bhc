@@ -16,7 +16,11 @@ fun PlayingRoute(
             playingViewModel.startMedia()
             mainActivity.playingRepositorySet(playingRepository = playingViewModel.playingRepository)
         }else {
-            playingViewModel.pollDataFromAlreadySetPlayingRepository()
+            if (mainActivity.getMessage()!!.id == playingViewModel.message.id) {
+                playingViewModel.pollDataFromAlreadySetPlayingRepository()
+            }else{
+                playingViewModel.stopMediaToRestartAnother()
+            }
         }
     }
 

@@ -20,6 +20,7 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     private var viewModel: PlayingServiceInterface? = null
     private var mainActivity: MainActivityPlayingServiceInterface? = null
     private var servicePreviouslyStartedState by Delegates.notNull<Boolean>()
+    private var serviceStartedByMainActivity = false
 
     init {
         servicePreviouslyStartedState = applicationContext.getPlayingServiceState()
@@ -44,14 +45,18 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
                 if (playingService.getMessage().id == message.id) {
                     viewModel?.playbackState(playingService.returnPlaybackState())
                     mainActivity?.playbackState(playingService.returnPlaybackState())
+                    mainActivity?.mediaStarted(true)
                 } else {
-                    playingService.stopMediaToRestartAnotherOne()
-                    playingService.startPlaying(message)
+                    stopMediaToRestartAnother(message)
                 }
             } else {
-                playingService.startPlaying(message)
+                if (serviceStartedByMainActivity) {
+//                    no message is currently being played
+                    endService()
+                }else{
+                    playingService.startPlaying(message)
+                }
             }
-            mainActivity?.mediaStarted(true)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -59,7 +64,8 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
         }
     }
 
-    override fun startService(message: Message) {
+    override fun startService(message: Message, fromMainActivity:Boolean) {
+        serviceStartedByMainActivity = fromMainActivity
         this.message = message
         if (servicePreviouslyStartedState) {
             bindService()
@@ -131,6 +137,12 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
 
     override fun setPlayingSpeed(playingSpeed: PlayingSpeed) {
         playingService.setPlayingSpeed(playingSpeed)
+    }
+
+    override fun stopMediaToRestartAnother(message: Message) {
+        this.message = message
+        playingService.stopMediaToRestartAnotherOne()
+        playingService.startPlaying(message)
     }
 
     override fun getMessage() = message
