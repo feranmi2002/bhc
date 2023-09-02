@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="60dp"
     android:background="@color/white"
     android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/image"
-        android:layout_width="50dp"
-        android:layout_height="match_parent"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_marginEnd="4dp"
         android:contentDescription="Image" />
 
@@ -29,7 +29,7 @@
             android:clickable="false"
             android:maxLines="1"
             android:textColor="#FF6650a4"
-            android:textSize="15sp"
+            android:textSize="17sp"
             android:textStyle="bold"
             tools:text="What we Preach" />
 
@@ -40,7 +40,8 @@
             android:layout_height="wrap_content"
             android:clickable="false"
             android:maxLines="1"
-            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:textSize="15sp"
             tools:text="Pastor Tunde Oluwaoyehun" />
     </LinearLayout>
 
@@ -56,7 +57,7 @@
             android:id="@+id/play_pause"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:contentDescription="@string/play_or_pause"
+            android:contentDescription="Play_Pause"
             android:src="@drawable/ic_round_pause_24" />
 
         <ImageView
@@ -65,7 +66,7 @@
             android:layout_height="30dp"
             android:layout_gravity="center"
             android:layout_marginStart="24dp"
-            android:contentDescription="@string/close"
+            android:contentDescription="Close"
             android:src="@drawable/ic_baseline_close_24" />
     </LinearLayout>
 </LinearLayout>
