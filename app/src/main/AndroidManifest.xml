@@ -25,7 +25,8 @@
             android:exported="true"
             android:theme="@style/Theme.BHC"
             android:taskAffinity=""
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -38,7 +39,7 @@
 
         <service
             android:name=".playingservice.PlayingService"
-            android:description="@string/playing_a_message"
+            android:description="@string/playing_a_sermon"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
