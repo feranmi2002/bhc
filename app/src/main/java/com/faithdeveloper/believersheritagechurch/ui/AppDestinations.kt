@@ -6,12 +6,12 @@ import com.faithdeveloper.believersheritagechurch.R
 sealed class AppDestinations(val route: String,  val title: String, @DrawableRes val icon: Int) {
     object AnnouncementDetail : AppDestinations(
         "announcememnt_detail",
-        "R.string.now_playing",
+        "",
         R.drawable.ic_launcher_foreground
     )
     object Playing : AppDestinations(
         "playing",
-        "R.string.now_playing",
+        "",
         R.drawable.ic_launcher_foreground
     )
     object Home : AppDestinations(
