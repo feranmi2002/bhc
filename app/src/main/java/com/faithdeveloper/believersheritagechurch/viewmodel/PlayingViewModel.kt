@@ -142,6 +142,10 @@ class PlayingViewModel private constructor(
         _navigateBackwards.value = true
     }
 
+    override fun playingSpeed(playingSpeed: PlayingSpeed) {
+        _playingSpeed.value = playingSpeed
+    }
+
     fun pauseDueToSlider() {
         playingRepository.pauseDueToSlider()
     }

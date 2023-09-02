@@ -252,6 +252,8 @@ class PlayingService : Service() {
             setOnSeekCompleteListener(mediaOnSeekCompleteListener)
             setOnCompletionListener(mediaOnCompletionListener)
             setOnInfoListener(mediaOnInfoListener)
+            setPlayingSpeed(PlayingSpeed.ONE_X)
+            updatePlayingSpeed(PlayingSpeed.ONE_X)
             try {
                 setDataSource(message.audioLink)
                 prepareAsync()
@@ -513,6 +515,10 @@ class PlayingService : Service() {
             }
         }
         mediaPlayer?.playbackParams = mediaPlayer!!.playbackParams.setSpeed(speed)
+    }
+
+    private fun updatePlayingSpeed(playingSpeed: PlayingSpeed){
+        repositoryServiceInterface.playingSpeed(playingSpeed)
     }
 
     fun getPlayingSpeed() = when(mediaPlayer?.playbackParams!!.speed){

@@ -150,4 +150,8 @@ class PlayingRepositoryImpl(private val applicationContext: Context) : PlayingRe
     override fun getPlaybackState() = playingService.returnPlaybackState()
 
     override fun getPlayingSpeed() = playingService.getPlayingSpeed()
+
+    override fun playingSpeed(playingSpeed: PlayingSpeed) {
+        viewModel?.playingSpeed(playingSpeed)
+    }
 }
