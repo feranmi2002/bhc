@@ -218,7 +218,7 @@ fun TimeCount(
                     sliderPosition = it
                 }
             },
-            colors = SliderDefaults.colors(thumbColor = Color.Black)
+            colors = SliderDefaults.colors(thumbColor = Color.Black, activeTrackColor = Color.White)
         )
         Text(
             text = Util.formatDuration(length),
@@ -426,27 +426,20 @@ fun InfoDialog(message: Message, showDialog: (Boolean) -> Unit) {
 
 @Composable
 fun DialogInfoItem(title: String, item: String) {
-    Surface(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.primary
+        horizontalAlignment = Alignment.Start,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.Start,
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontSize = 16.sp,
+        )
 
-            Text(
-                text = item,
-                style = MaterialTheme.typography.bodyMedium,
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        Text(
+            text = item,
+            style = MaterialTheme.typography.bodyMedium,
+            fontSize = 15.sp,
+        )
     }
 }
