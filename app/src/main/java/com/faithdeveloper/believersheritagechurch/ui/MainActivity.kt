@@ -44,9 +44,8 @@ class MainActivity : ComponentActivity(), MainActivityPlayingServiceInterface {
                     Gson().fromJson(
                         Uri.decode(initialPlayingMessage),
                         Message::class.java
-                    )
+                    ), fromMainActivity = true
                 )
-                _mediaStarted.value = true
             }
         }
 

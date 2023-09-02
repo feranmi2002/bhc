@@ -314,7 +314,7 @@ fun ChipGroup(
                     onSelectionChanged = {
                         onSelectedChange.invoke(it)
                     },
-                    isSelected = selectedType == it
+                    isSelected = selectedType != it
                 )
             }
         }
@@ -433,7 +433,7 @@ fun PlayingBar(
             if (mediaState == PlaybackState.BUFFERING) {
                 CircularProgressIndicator(
                     modifier = Modifier
-                        .size(40.dp),
+                        .size(30.dp),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {

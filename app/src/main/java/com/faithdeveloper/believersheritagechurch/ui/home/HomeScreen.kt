@@ -61,7 +61,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            TopStrip(mainActivity = mainActivity)
+            TopStrip()
 
             Card(
                 modifier = Modifier
@@ -107,7 +107,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun TopStrip(mainActivity: MainActivity) {
+fun TopStrip() {
     Row(
         modifier = Modifier
             .fillMaxWidth()

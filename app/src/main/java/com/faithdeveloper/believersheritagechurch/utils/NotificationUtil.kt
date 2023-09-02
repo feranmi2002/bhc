@@ -2,10 +2,8 @@ package com.faithdeveloper.believersheritagechurch.utils
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -17,14 +15,10 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.faithdeveloper.believersheritagechurch.R
-import com.faithdeveloper.believersheritagechurch.data.announcement.Announcement
-import com.faithdeveloper.believersheritagechurch.ui.MainActivity
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.util.*
 
 object NotificationUtil {
 
