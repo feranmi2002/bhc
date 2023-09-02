@@ -374,7 +374,7 @@ fun Search(
                     onCloseSearch.invoke()
                 }
                 .padding(start = 8.dp),
-            painter = painterResource(id = R.drawable.ic_baseline_search_24),
+            painter = painterResource(id = R.drawable.ic_baseline_close_24),
             contentDescription = "Close Search"
         )
 
