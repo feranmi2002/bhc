@@ -15,12 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.faithdeveloper.believersheritagechurch.R
 import com.faithdeveloper.believersheritagechurch.data.messages.Message
 import com.faithdeveloper.believersheritagechurch.data.playing.PlaybackState
 import com.faithdeveloper.believersheritagechurch.data.programmes.Programme
@@ -49,7 +47,7 @@ fun ProgrammesScreen(
             .fillMaxSize()
     ) {
         ReusableTop(
-            title = stringResource(id = R.string.programmes)
+            title = "Programmes"
         )
 
         when (items.type) {
