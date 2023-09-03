@@ -7,11 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,10 +31,12 @@ import com.faithdeveloper.believersheritagechurch.ui.messages.PlayingBar
 import com.faithdeveloper.believersheritagechurch.utils.Result
 import com.faithdeveloper.believersheritagechurch.utils.Status
 import com.faithdeveloper.believersheritagechurch.viewmodel.HomeViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
-import java.util.*
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
@@ -123,13 +125,14 @@ fun TopStrip() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalGlideComposeApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalGlideComposeApi::class,
+    ExperimentalPagerApi::class
+)
 @Composable
 fun AutoSlidingCarousel(
     autoSlideDuration: Long = 5000L,
-    pagerState: PagerState = remember {
-        PagerState()
-    },
+    pagerState: PagerState = rememberPagerState(),
     images: Result<ImageSliderImage>,
     onClickSliderImage: (imageSliderImage: ImageSliderImage) -> Unit,
     retryLoadImages: () -> Unit
@@ -158,7 +161,10 @@ fun AutoSlidingCarousel(
                     .fillMaxWidth()
 
             ) {
-                HorizontalPager(pageCount = images.data.size, state = pagerState) { page ->
+                com.google.accompanist.pager.HorizontalPager(
+                    count = images.data.size,
+                    state = pagerState
+                ) { page ->
                     GlideImage(
                         alignment = Alignment.Center,
                         model = images.data[page].image_link,

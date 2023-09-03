@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="60dp"
     android:background="@color/purple80"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="4dp">
 
     <ImageView
         android:id="@+id/image"
@@ -23,6 +23,7 @@
 
         <TextView
             android:id="@+id/title"
+            style="@style/TextAppearance.Compat.Notification.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
@@ -30,19 +31,18 @@
             android:maxLines="1"
             android:textSize="17sp"
             android:textStyle="bold"
-            style="@style/TextAppearance.Compat.Notification.Title"
             tools:text="What we Preach" />
 
         <TextView
             android:id="@+id/preacher"
+            style="@style/TextAppearance.Compat.Notification.Line2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:clickable="false"
             android:maxLines="1"
-            android:layout_marginTop="4dp"
-            android:textSize="15sp"
             android:textColor="@color/purple40"
-            style="@style/TextAppearance.Compat.Notification.Line2"
+            android:textSize="15sp"
             tools:text="Pastor Tunde Oluwaoyehun" />
     </LinearLayout>
 
@@ -68,7 +68,6 @@
             android:layout_gravity="center"
             android:layout_marginStart="24dp"
             android:contentDescription="Close"
-            android:src="@drawable/ic_baseline_close_24"
-            />
+            android:src="@drawable/ic_baseline_close_24_notif" />
     </LinearLayout>
 </LinearLayout>
