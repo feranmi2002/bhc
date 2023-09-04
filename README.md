@@ -10,3 +10,6 @@ I built the BHC App for my church. I built as a side project to hone my skills i
 **Glide** - Image Loading
 
 ![BHC_home_phone_github](https://github.com/feranmi2002/bhc/assets/60087143/9e09f22b-2848-41e7-95a8-01cafd91c65a)
+![BHC_messa_sec_github](https://github.com/feranmi2002/bhc/assets/60087143/b38c11d9-3c68-4c7d-b297-30817cd34495)
+![BHC_home_dark_github](https://github.com/feranmi2002/bhc/assets/60087143/bb343ba7-4af6-48d6-a998-c40e17203084)
+![message-git](https://github.com/feranmi2002/bhc/assets/60087143/888d089c-d243-4e03-99d7-60075c7fd5b5)
